@@ -1,7 +1,7 @@
 import { chatSession } from "@/configs/AiModel";
 import { NextResponse } from "next/server";
 
-const ENHANCE_PROMPT = `You are a prompt engineering expert. Your task is to enhance a user's prompt to make it more detailed, specific, and effective for generating high-quality React code that runs in a Sandpack browser environment.
+const ENHANCE_PROMPT = `You are a prompt engineering expert. Your task is to intelligently enhance a user's prompt by identifying and filling logical gaps, making requirements explicit, and ensuring the AI understands exactly what to build.
 
 **CRITICAL CONSTRAINTS (MUST follow - these are hard requirements):**
 - Code runs in browser-only Sandpack environment (NO Node.js, NO build tools, NO bundlers)
@@ -10,24 +10,52 @@ const ENHANCE_PROMPT = `You are a prompt engineering expert. Your task is to enh
 - Use functional React components with hooks (useState, useEffect, etc.)
 - Use localStorage for data persistence (no backend/API)
 - JavaScript/JSX only (NO TypeScript)
-- Do NOT suggest: Next.js, Vite, Create React App, or any build tool
-- Do NOT suggest libraries NOT in the allowed list above
+- Do NOT suggest libraries outside the allowed list above
 - Do NOT suggest: axios, fetch API calls, or external APIs (use localStorage or mock data)
-- Keep it simple and browser-compatible
 
-**Enhancement Guidelines:**
-- Keep the user's original intent and core request
-- Add specific technical details using ONLY the allowed dependencies listed above
-- Make UI/UX expectations clear - use Tailwind CSS classes for styling
-- Mention that Tailwind CSS is available via CDN (no configuration needed)
-- Suggest using lucide-react for icons (it's already available)
-- If data persistence needed, mention localStorage
-- Suggest using react-router-dom for navigation if multi-page app
-- Keep it concise but comprehensive (2-4 sentences for short prompts, 1-2 paragraphs for longer ones)
-- Maintain a friendly, professional tone
-- Do NOT add code examples or commentary
-- Do NOT suggest libraries outside the allowed dependencies list
-- Return ONLY the enhanced prompt, nothing else
+**INTELLIGENT ENHANCEMENT STRATEGY:**
+
+1. **Identify Missing Features:**
+   - What CRUD operations are needed? (Create, Read, Update, Delete)
+   - What user interactions are missing? (click, hover, form submissions, etc.)
+   - What data states are needed? (loading, empty, error, success)
+   - What validation is required? (form validation, input checks)
+
+2. **Fill Logical Gaps:**
+   - What happens when data is empty? (empty states)
+   - How are errors handled? (error messages, try-catch)
+   - What user feedback is needed? (toasts, confirmations, loading states)
+   - What edge cases exist? (empty inputs, invalid data, network failures)
+
+3. **Clarify User Flows:**
+   - What's the main user journey? (step-by-step flow)
+   - What navigation is needed? (single-page or multi-page using react-router-dom)
+   - What actions can users take? (be explicit about all interactions)
+
+4. **Make Technical Requirements Explicit:**
+   - Use Tailwind CSS for styling (available via CDN, no config needed)
+   - Use lucide-react for icons (already available)
+   - Use localStorage for data persistence (specify what data to save)
+   - Use functional React components with hooks
+   - Specify component structure (how many components, what they do)
+
+5. **Enhance UI/UX Clarity:**
+   - What should the layout look like? (grid, flex, sections)
+   - What visual states are needed? (hover, active, disabled, focus)
+   - What responsive behavior? (mobile, tablet, desktop)
+   - What animations/transitions? (smooth, subtle)
+
+**OUTPUT FORMAT:**
+- Start with the core request (keep original intent)
+- Add missing features and logical gaps explicitly
+- Clarify user flows and interactions
+- Specify technical implementation details
+- Make UI/UX requirements clear
+- Keep it comprehensive but readable (1-3 paragraphs)
+- Use clear, direct language
+- Do NOT add code examples or markdown formatting
+- Do NOT suggest libraries outside the allowed dependencies
+- Return ONLY the enhanced prompt text, nothing else
 
 **Original prompt:**`;
 
