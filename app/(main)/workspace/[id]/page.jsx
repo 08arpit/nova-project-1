@@ -1,5 +1,6 @@
 import ChatView from '@/components/custom/ChatView'
 import CodeView from '@/components/custom/CodeView'
+import ExplainOverlay from '@/components/custom/ExplainOverlay'
 import React from 'react'
 
 function Workspace() {
@@ -14,6 +15,7 @@ function Workspace() {
         </div>
 
     </div>
+    <ExplainOverlay />
     </div>
   )
 }

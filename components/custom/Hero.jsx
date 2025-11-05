@@ -2,13 +2,14 @@
 import { MessagesContext } from '@/context/MessagesContext';
 import { UserDetailContext } from '@/context/UserDetailContext';
 import Lookup from '@/data/Lookup';
-import { ArrowRight, Link, Loader2 } from 'lucide-react';
+import { ArrowRight, Link, Loader2, Sparkles } from 'lucide-react';
 import React, { useContext, useState } from 'react';
 import SignInDialog from './SignInDialog';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 function Hero() {
   const [userInput, setUserInput] = useState('');
@@ -16,6 +17,7 @@ function Hero() {
   const { userDetail, setUserDetail } = useContext(UserDetailContext);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [enhancing, setEnhancing] = useState(false);
   const CreateWorkspace = useMutation(api.workspace.CreateWorkspace);
   const router = useRouter();
 
@@ -75,6 +77,28 @@ function Hero() {
     }
   };
 
+  const handleEnhance = async () => {
+    if (!userInput.trim()) {
+      toast("Please enter a prompt first");
+      return;
+    }
+    setEnhancing(true);
+    try {
+      const response = await axios.post('/api/enhance-prompt', {
+        prompt: userInput,
+      });
+      const enhanced = response.data?.enhanced || userInput;
+      setUserInput(enhanced);
+      toast.success("Prompt enhanced successfully!");
+    } catch (err) {
+      console.error('Enhance failed:', err);
+      const serverMsg = err?.response?.data?.error || err?.message || 'Failed to enhance prompt';
+      toast.error(serverMsg);
+    } finally {
+      setEnhancing(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-full px-4">
       {loading && (
@@ -92,21 +116,36 @@ function Hero() {
             backgroundColor: Lookup.COLORS.BACKGROUND,
           }}
         >
-          <div className="flex gap-2"
-          >
-          <textarea
-            placeholder={Lookup.INPUT_PLACEHOLDER}
-            className="outline-none bg-transparent w-full h-28 max-h-56 resize-none text-neutral-200"
-            onChange={(event) => setUserInput(event.target.value)}
-            onKeyPress={handleKeyPress}
-            value={userInput}
-          />
-          {userInput && (
-            <ArrowRight
-              onClick={() => onGenerate(userInput)}
-              className="bg-blue-500 p-2 w-10 h-10 rounded-md cursor-pointer hover:bg-blue-600 transition-colors"
+          <div className="flex gap-2 items-start">
+            <textarea
+              placeholder={Lookup.INPUT_PLACEHOLDER}
+              className="outline-none bg-transparent w-full h-28 max-h-56 resize-none text-neutral-200"
+              onChange={(event) => setUserInput(event.target.value)}
+              onKeyPress={handleKeyPress}
+              value={userInput}
             />
-          )}
+            <div className="flex flex-col gap-2">
+              {userInput && (
+                <button
+                  onClick={handleEnhance}
+                  disabled={enhancing}
+                  className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white p-2 w-10 h-10 rounded-md transition-colors flex items-center justify-center"
+                  title="Enhance prompt"
+                >
+                  {enhancing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+              {userInput && (
+                <ArrowRight
+                  onClick={() => onGenerate(userInput)}
+                  className="bg-blue-500 p-2 w-10 h-10 rounded-md cursor-pointer hover:bg-blue-600 transition-colors"
+                />
+              )}
+            </div>
           </div>
           <div>
             <Link className="h-5 w-5" />

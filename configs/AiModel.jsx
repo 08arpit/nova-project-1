@@ -5,11 +5,15 @@ import {
 } from '@google/generative-ai';
 
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
+if (!apiKey) {
+  // Do not throw at import-time; allow routes to respond gracefully
+  console.warn("[AiModel] Missing NEXT_PUBLIC_GEMINI_API_KEY. API routes will return an error until it's set.");
+}
+const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
-const model = genAI.getGenerativeModel({
+const model = genAI ? genAI.getGenerativeModel({
   model: 'gemini-2.0-flash-exp',
-});
+}) : null;
 
 const generationConfig = {
   temperature: 1,
@@ -26,12 +30,16 @@ const CodeGenerationConfig = {
   responseMimeType: 'application/json',
 };
 
-export const chatSession = model.startChat({
+export const chatSession = model ? model.startChat({
   generationConfig,
   history: [],
-});
+}) : {
+  sendMessage: async () => {
+    throw new Error('Missing NEXT_PUBLIC_GEMINI_API_KEY');
+  }
+};
 
-export const GenAiCode = model.startChat({
+export const GenAiCode = model ? model.startChat({
   generationConfig: CodeGenerationConfig,
   history: [
     {
@@ -47,7 +55,11 @@ export const GenAiCode = model.startChat({
       ],
     },
   ],
-})
+}) : {
+  sendMessage: async () => {
+    throw new Error('Missing NEXT_PUBLIC_GEMINI_API_KEY');
+  }
+}
 
 //   const result = await chatSession.sendMessage('INSERT_INPUT_HERE');
 //   console.log(result.response.text());

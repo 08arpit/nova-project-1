@@ -1,6 +1,7 @@
 {
   "name": "nova-ai",
   "version": "0.1.0",
+  "description": "AI-powered code generation platform that helps you build React applications from natural language prompts",
   "private": true,
   "author": "Arpit",
   "scripts": {

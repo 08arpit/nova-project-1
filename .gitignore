@@ -31,7 +31,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 !.env.example
 
 # vercel
@@ -40,3 +44,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Convex
+.convex/
+# Note: convex/_generated/ files are typically committed for Convex projects
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp

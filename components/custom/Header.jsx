@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import Lookup from '@/data/Lookup';
 import { UserDetailContext } from '@/context/UserDetailContext';
 import Link from 'next/link';
-import { Download, Menu, Rocket } from 'lucide-react';
+import { Download, Menu, Rocket, Sparkles } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { ActionContext } from '@/context/ActionContext';
 import SignInDialog from './SignInDialog';
@@ -66,6 +66,12 @@ function Header({ onMenuClick }) {
             <>
               <Button variant="ghost" onClick={() => onActionBtn('export')}>
                 <Download /> Export
+              </Button>
+              <Button
+                className="text-white bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg shadow-purple-500/30"
+                onClick={() => onActionBtn('explain')}
+              >
+                <Sparkles className="w-4 h-4 mr-1.5" /> Explain
               </Button>
               <Button
                 onClick={() => onActionBtn('deploy')}

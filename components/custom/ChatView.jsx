@@ -66,7 +66,7 @@ function ChatView() {
     setLoading(true);
     // Switch to code view when user sends a message
     setAction({ actionType: 'code' });
-    
+    try {
     const PROMPT = JSON.stringify(messages) + Lookup.PROMPT.CHAT_PROMPT;
     console.log({ PROMPT });
     const result = await axios.post('/api/ai-chat', {
@@ -78,20 +78,25 @@ function ChatView() {
       content: result.data.result,
     };
     setMessages((prev) => [...prev, aiResp]);
-    
     await UpdateMessages({
       messages: [...messages, aiResp],
       workspaceId: id,
     });
     console.log("LEN", countToken(JSON.stringify(aiResp)));
     const token = Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
-    setUserDetail(prev=>( {...prev, token: token}))
+      setUserDetail(prev => ({ ...prev, token: token }));
     await UpdateToken({
       token: token,
       userId: userDetail?._id
-    })
-
+      });
+    } catch (err) {
+      console.error('Chat generation failed:', err);
+      const serverMsg = err?.response?.data?.error || err?.message || 'Failed to get AI response';
+      const details = err?.response?.data?.details;
+      toast(`${serverMsg}${details ? `: ${details}` : ''}`);
+    } finally {
     setLoading(false);
+    }
   };
 
   const onGenerate = (input) => {
@@ -104,7 +109,7 @@ function ChatView() {
   };
 
   return (
-    <div className="relative h-[79.7vh] flex flex-col bg-gray-900/50 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden border border-gray-800">
+    <div className="relative h-[79.7vh] flex flex-col bg-gray-900 rounded-lg shadow-xl overflow-hidden border border-gray-800">
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-4">
         {messages?.length > 0 && messages?.map((msg, index) => (
           <div
@@ -126,21 +131,21 @@ function ChatView() {
               className={`group relative max-w-[85%] ${msg?.role === 'user' ? 'order-1' : 'order-2'}`}
             >
               <div
-                className={`rounded-xl text-sm p-3 ${
+                className={`rounded-xl text-[13px] leading-6 p-3 ${
                   msg?.role === 'user' 
                     ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-none' 
-                    : 'bg-gray-800/80 text-neutral-200 rounded-bl-none border border-gray-700/50'
+                    : 'bg-gray-800 text-neutral-200 rounded-bl-none border border-gray-700'
                 }`}
               >
-                <ReactMarkdown className="prose prose-invert prose-sm max-w-none prose-p:my-3 prose-headings:my-3 prose-pre:my-3 prose-code:text-[9px] prose-pre:text-[9px] prose-p:text-sm prose-headings:text-sm prose-li:text-sm">
-                  {msg?.content}
+                <ReactMarkdown className="prose prose-invert max-w-none break-words whitespace-pre-line prose-p:my-1 prose-headings:my-2 prose-li:my-1 prose-pre:my-2 prose-code:text-[12px] prose-pre:text-[12px]">
+                  {(msg?.content || '').replace(/\n{3,}/g, '\n\n')}
                 </ReactMarkdown>
               </div>
               <div className={`absolute -bottom-1.5 ${msg?.role === 'user' ? 'right-0' : 'left-0'} w-3 h-3 overflow-hidden`}>
                 <div className={`absolute w-3 h-3 transform rotate-45 ${
                   msg?.role === 'user' 
                     ? 'bg-blue-600 right-0' 
-                    : 'bg-gray-800/80 left-0 border-r border-b border-gray-700/50'
+                    : 'bg-gray-800 left-0 border-r border-b border-gray-700'
                 }`} />
               </div>
             </div>
@@ -168,7 +173,7 @@ function ChatView() {
                 className="rounded-full ring-2 ring-blue-500/20"
               />
             </div>
-            <div className="bg-gray-800/80 p-3 rounded-xl rounded-bl-none border border-gray-700/50">
+            <div className="bg-gray-800 p-3 rounded-xl rounded-bl-none border border-gray-700">
               <div className="flex items-center gap-2">
                 <Loader2Icon className="animate-spin w-3.5 h-3.5 text-blue-500" />
                 <span className="text-xs text-neutral-300">Thinking...</span>
@@ -179,11 +184,11 @@ function ChatView() {
       </div>
 
       {/* Input Section */}
-      <div className="relative p-3 border-t border-gray-800" style={{ backgroundColor: Lookup.COLORS.BACKGROUND }}>
+      <div className="relative p-3 border-t border-gray-800 bg-gray-900">
         <div className="flex-1 relative">
           <textarea
             placeholder="What would you like to add or modify?"
-            className="w-full outline-none bg-transparent resize-none text-base text-neutral-200 pr-12 rounded-lg"
+            className="w-full outline-none bg-transparent resize-none text-[14px] leading-6 text-neutral-200 pr-12 rounded-lg"
             onChange={(e) => setUserInput(e.target.value)}
             onKeyPress={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {

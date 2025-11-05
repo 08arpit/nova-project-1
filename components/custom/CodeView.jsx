@@ -81,37 +81,46 @@ function CodeView() {
     }
     // return;
     setLoading(true);
-    const PROMPT = JSON.stringify(messages) + ' ' + Lookup.PROMPT.CODE_GEN_PROMPT;
-    console.log({ PROMPT });
-    const result = await axios.post('/api/gen-ai-code', {
-      prompt: PROMPT,
-    });
+    try {
+      const PROMPT = `${Lookup.PROMPT.CODE_GEN_PROMPT}\n\nUser request and context:\n${JSON.stringify(messages)}`;
+      console.log({ PROMPT });
+      const result = await axios.post('/api/gen-ai-code', {
+        prompt: PROMPT,
+      });
 
-    console.log(result?.data);
-    const aiResp = result.data;
-    let mergedFiles = { ...Lookup.DEFAULT_FILE, ...aiResp?.files };
-    // Ensure /App.js and /index.js are present
-    if (!mergedFiles['/App.js']) {
-      console.warn('AI output missing /App.js, using default');
-      mergedFiles['/App.js'] = Lookup.DEFAULT_FILE['/App.js'];
+      console.log(result?.data);
+      const aiResp = result.data;
+      if (aiResp?.error) {
+        throw new Error(aiResp?.error + (aiResp?.details ? `: ${aiResp.details}` : ''));
+      }
+      let mergedFiles = { ...Lookup.DEFAULT_FILE, ...aiResp?.files };
+      // Ensure /App.js and /index.js are present
+      if (!mergedFiles['/App.js']) {
+        console.warn('AI output missing /App.js, using default');
+        mergedFiles['/App.js'] = Lookup.DEFAULT_FILE['/App.js'];
+      }
+      if (!mergedFiles['/index.js']) {
+        console.warn('AI output missing /index.js, using default');
+        mergedFiles['/index.js'] = Lookup.DEFAULT_FILE['/index.js'];
+      }
+      setFiles(ensureValidFiles(mergedFiles));
+      await UpdateFiles({
+        workspaceId: id,
+        files: aiResp?.files,
+      });
+      const token =
+        Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
+      setUserDetail((prev) => ({ ...prev, token: token }));
+      await UpdateToken({
+        token: token,
+        userId: userDetail?._id,
+      });
+    } catch (err) {
+      console.error('Code generation failed:', err);
+      toast("Failed to generate code. Please try again or refine your prompt.");
+    } finally {
+      setLoading(false);
     }
-    if (!mergedFiles['/index.js']) {
-      console.warn('AI output missing /index.js, using default');
-      mergedFiles['/index.js'] = Lookup.DEFAULT_FILE['/index.js'];
-    }
-    setFiles(ensureValidFiles(mergedFiles));
-    await UpdateFiles({
-      workspaceId: id,
-      files: aiResp?.files,
-    });
-    setLoading(false);
-    const token =
-      Number(userDetail?.token) - Number(countToken(JSON.stringify(aiResp)));
-    setUserDetail((prev) => ({ ...prev, token: token }));
-    await UpdateToken({
-      token: token,
-      userId: userDetail?._id,
-    });
   };
 
   return (
